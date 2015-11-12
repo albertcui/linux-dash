@@ -5,11 +5,21 @@ var path    = require('path');
 var spawn   = require('child_process').spawn;
 var fs      = require('fs');
 var ws      = require('websocket').server;
+var auth    = require('http-auth');
+var config  = require('../config.js');
 
-server.listen(80);
+var basic = auth.basic({
+        realm: "Status."
+    }, function (username, password, callback) {
+        callback(username === (config.username || "user") && password === (config.password || "password"));
+    }
+);
+
+server.listen(8001);
 console.log('Linux Dash Server Started!');
 
 app.use(express.static(path.resolve(__dirname + '/../')));
+app.use(auth.connect(basic));
 
 app.get('/', function (req, res) {
 	res.sendFile(path.resolve(__dirname + '/../index.html'));
